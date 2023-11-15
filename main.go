@@ -6,7 +6,18 @@ import (
 	"path/filepath"
 )
 
+var (
+	BuildDate    string
+	BuildVersion string
+)
+
 func main() {
+	if len(os.Args) == 2 && os.Args[1] == "--version" {
+		fmt.Println("BuildVersion:", BuildVersion)
+		fmt.Println("BuildDate:", BuildDate)
+		return
+	}
+
 	if len(os.Args) != 3 {
 		fmt.Println("usage: r <path> <new_filename>")
 		return
