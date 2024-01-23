@@ -32,24 +32,34 @@ var _ = Describe("R", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 		})
 
-		helper.WithRunningDomain(
-			It("renames file", func() {
-				renamed := filepath.Base(tempFile.Name()) + "2"
-				session, err := gexec.Start(
-					exec.Command("ci-build/r", tempFile.Name(), renamed),
-					GinkgoWriter,
-					GinkgoWriter,
-				)
-				Expect(err).ShouldNot(HaveOccurred())
-				Eventually(session).Should(gexec.Exit())
+		It("renames file", func() {
+			renamed := filepath.Base(tempFile.Name()) + "2"
+			session, err := gexec.Start(
+				exec.Command("ci-build/r", tempFile.Name(), renamed),
+				GinkgoWriter,
+				GinkgoWriter,
+			)
+			Expect(err).ShouldNot(HaveOccurred())
+			Eventually(session).Should(gexec.Exit())
 
-				_, err = os.Stat(tempFile.Name())
-				Expect(err).To(MatchError(os.IsNotExist, "It is not existing"))
+			_, err = os.Stat(tempFile.Name())
+			Expect(err).To(MatchError(os.IsNotExist, "It is not existing"))
 
-				_, err = os.Stat(filepath.Join(tempDir, renamed))
-				Expect(err).Should(BeNil())
-			})
-		)
+			_, err = os.Stat(filepath.Join(tempDir, renamed))
+			Expect(err).Should(BeNil())
+		})
+
+		It("shows version", func() {
+			session, err := gexec.Start(
+				exec.Command("ci-build/r", "--version"),
+				GinkgoWriter,
+				GinkgoWriter,
+			)
+			Expect(err).ShouldNot(HaveOccurred())
+			Eventually(session).Should(gexec.Exit())
+			Expect(session.Out).Should(gbytes.Say(`(?m)BuildVersion:.*\nBuildDate:`))
+			Expect(session.Err).Should(gbytes.Say(""))
+		})
 	})
 
 	When("binary is used incorrectly", func() {
